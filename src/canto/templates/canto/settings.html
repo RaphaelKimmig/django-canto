@@ -1,0 +1,40 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+    {% if oauth_error_code %}
+        <h2>{% trans "An error occurred" %}</h2>
+        <p>{{ oauth_error_code }}: {{ oauth_error_message }}</p>
+
+        <p><a href="{{ oauth_url }}">Try again.</a></p>
+    {% else %}
+
+        {% if form.is_valid %}
+            <h2>{% trans "Please confirm the connection to canto" %}</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="{% trans "Confirm connection" %}">
+            </form>
+        {% else %}
+            {% if settings.is_connected %}
+                <form method="POST" action="{% url "canto:refresh-token" %}">
+                    {% csrf_token %}
+                    <input type="submit" value="{% trans "Refresh token" %}">
+                </form>
+                <form method="POST" action="{% url "canto:disconnect" %}" id="canto-disconnect">
+                    {% csrf_token %}
+                    <input type="submit" value="{% trans "Disconnect" %}">
+                </form>
+            {% endif %}
+
+            {% if settings.is_connected %}
+                <h2>You are connected to canto.</h2>
+                Your token is valid until {{ settings.token_valid_until }}
+            {% else %}
+                <h2>You are not connected to canto.</h2>
+                <a href="{{ oauth_url }}">Connect now.</a>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endblock %}

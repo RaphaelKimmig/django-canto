@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+    {% block search %}
+        <form method="GET" action="{% url "canto:search" %}">
+            <input type="text" name="query" value="{{ query }}">
+            <input type="submit" value="Search">
+        </form>
+    {% endblock %}
+
+    {% block tree %}
+        <ul style="float: left; width: 300px;">
+            {% for tree_item in tree_items %}
+                <li>
+                    {% include "canto/partials/tree_item.html" with item=tree_item %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endblock %}
+
+    {% block album %}
+    <ul style="float: left; width: 600px;">
+        {% for item in album %}
+            <li>
+                {% include "canto/partials/album_item.html" with item=item %}
+            </li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+{% endblock %}

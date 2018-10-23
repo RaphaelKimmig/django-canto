@@ -1,0 +1,3 @@
+recursive-include src/canto/templates/ *.html
+recursive-include src/canto/static/ *.css
+recursive-include src/canto/static/ *.js

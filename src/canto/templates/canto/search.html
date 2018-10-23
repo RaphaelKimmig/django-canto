@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+    <form method="GET">
+        <input type="text" name="query" value="{{ query }}">
+        <input type="submit" value="Search">
+    </form>
+    {% if query and not results %}
+    <p>{% trans "No results found." %}</p>
+    {% endif %}
+    <ul>
+        {% for result in results %}
+            <li>
+                {% include "canto/partials/album_item.html" with item=result %}
+            </li>
+        {% endfor %}
+    </ul>
+    {% if previous_page_link %}
+        <a href="{{ previous_page_link }}">{% trans "Previous page" %}</a>
+    {% endif %}
+    Showing page {{ page }} of {{ num_pages }} for {{ num_results }} results.
+    {% if next_page_link %}
+        <a href="{{ next_page_link }}">{% trans "Next page" %}</a>
+    {% endif %}
+{% endblock %}
