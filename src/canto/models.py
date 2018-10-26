@@ -3,6 +3,9 @@ from django.utils import timezone
 
 
 class CantoSettings(models.Model):
+    class Meta:
+        permissions = (("browse_library", "Can browse the canto library"),)
+
     access_token = models.CharField(max_length=255)
     refresh_token = models.CharField(max_length=255)
 

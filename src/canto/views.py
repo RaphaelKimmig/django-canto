@@ -1,11 +1,13 @@
-import math
 from logging import getLogger
 
 from django.conf import settings
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.messages import success
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext as _
+from django.views import View
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
 from django.views.generic import FormView, TemplateView
@@ -23,29 +25,7 @@ from .forms import CantoSettingsForm
 logger = getLogger(__name__)
 
 
-def paginate_canto_results(data, start, paginate_by):
-    results_total = data["found"]
-    results = data["results"]
-
-    page = start // paginate_by + 1
-    num_pages = math.ceil(results_total / paginate_by)
-
-    context = {
-        "results": results,
-        "num_results": results_total,
-        "page": page,
-        "num_pages": num_pages,
-    }
-
-    if start > 0:
-        context["previous_page_link"] = "?start={}".format(max(start - paginate_by, 0))
-
-    if results_total > start + len(results):
-        context["next_page_link"] = "?start={}".format(start + paginate_by)
-
-    return context
-
-
+@permission_required("canto.change_cantosettings")
 @require_POST
 def refresh_token(request, success_url=reverse_lazy("canto:settings")):
     refresh_and_save_access_token()
@@ -53,6 +33,7 @@ def refresh_token(request, success_url=reverse_lazy("canto:settings")):
     return HttpResponseRedirect(success_url)
 
 
+@permission_required("canto.change_cantosettings")
 @require_POST
 def disconnect(request, success_url=reverse_lazy("canto:settings")):
     disconnect_canto()
@@ -60,7 +41,8 @@ def disconnect(request, success_url=reverse_lazy("canto:settings")):
     return HttpResponseRedirect(success_url)
 
 
-class CantoSettingsView(FormView):
+class CantoSettingsView(PermissionRequiredMixin, FormView):
+    permission_required = "canto.change_cantosettings"
     form_class = CantoSettingsForm
     template_name = "canto/settings.html"
 
@@ -116,95 +98,66 @@ class CantoSettingsView(FormView):
         return error_code, error_message
 
 
-class CantoTreeView(TemplateView):
-    template_name = "canto/tree.html"
-    title = _("Canto tree")
-
-    def get_context_data(self, **kwargs):
-        results = get_canto_client().get_tree()
-        context = {"results": results, "title": self.title}
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
-
-class CantoAlbumView(TemplateView):
-    paginate_by = 10
-    album_id = None
-    title = _("Canto album")
-    template_name = "canto/album.html"
+class CantoLibraryView(PermissionRequiredMixin, TemplateView):
+    permission_required = "canto.browse_library"
+    template_name = "canto/library.html"
+    title = _("Canto library")
+    paginate_by = 100
 
     def get_context_data(self, **kwargs):
         context = {"title": self.title}
-
-        try:
-            page = int(self.request.GET.get("page", 0))
-        except ValueError:
-            page = 0
-
-        results = get_canto_client().get_album(
-            self.kwargs["album_id"],
-            page,
-            self.paginate_by,
-            settings.CANTO_FILTER_SCHEMES,
-        )
-
-        print(list(results))
-        context.update({"results": results})
-        context.update(kwargs)
-
-        return super().get_context_data(**context)
-
-
-class CantoSearchView(TemplateView):
-    template_name = "canto/search.html"
-    title = _("Canto search")
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-        query = self.request.GET.get("query", "")
-        try:
-            page = int(self.request.GET.get("page", 0))
-        except ValueError:
-            page = 0
-
-        context = {}
-        if query:
-            context["results"] = get_canto_client().get_search_results(
-                query, page, self.paginate_by, settings.CANTO_FILTER_SCHEMES
-            )
         context.update(kwargs)
         return super().get_context_data(**context)
 
 
-class CantoLibraryView(TemplateView):
-    template_name = "canto/library.html"
-    title = _("Canto library")
-    album_id = None
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-        canto_client = get_canto_client()
-        tree_data = canto_client.get_tree()
-
-        context = {"tree_items": tree_data, "title": self.title}
-
-        album_id = self.kwargs.get("album_id")
-        if album_id:
-            try:
-                page = int(self.request.GET.get("page", 0))
-            except ValueError:
-                page = 0
-
-            album = canto_client.get_album(
-                album_id, page, self.paginate_by, settings.CANTO_FILTER_SCHEMES
-            )
-            context["album"] = album
-
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
-
+@permission_required("canto.browse_library", raise_exception=True)
 @cache_control(max_age=300)
 def canto_binary_view(request, url):
     public_url = get_canto_client().get_public_url_for_binary(url)
     return HttpResponseRedirect(public_url)
+
+
+class CantoTreeJsonView(PermissionRequiredMixin, View):
+    permission_required = "canto.browse_library"
+
+    def get(self, request, **kwargs):
+        results = get_canto_client().get_tree()
+        return JsonResponse(results)
+
+
+class CantoAlbumJsonView(PermissionRequiredMixin, View):
+    permission_required = "canto.browse_library"
+    paginate_by = 100
+    album_id = None
+
+    def get(self, request, **kwargs):
+        try:
+            start = int(request.GET.get("start", 0))
+        except ValueError:
+            start = 0
+
+        results = get_canto_client().get_album(
+            self.kwargs["album_id"],
+            start,
+            self.paginate_by,
+            settings.CANTO_FILTER_SCHEMES,
+        )
+
+        return JsonResponse(results)
+
+
+class CantoSearchJsonView(PermissionRequiredMixin, View):
+    permission_required = "canto.browse_library"
+    paginate_by = 100
+
+    def get(self, request, **kwargs):
+        try:
+            start = int(request.GET.get("start", 0))
+        except ValueError:
+            start = 0
+
+        results = get_canto_client().get_search_results(
+            kwargs["query"], start, self.paginate_by, settings.CANTO_FILTER_SCHEMES
+        )
+
+        return JsonResponse(results)

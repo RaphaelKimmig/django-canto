@@ -17,7 +17,7 @@ class CantoConfig(AppConfig):
             "CANTO_OAUTH_TOKEN_URL",
             "https://oauth.canto.com:8443/oauth/api/oauth2/token",
         )
-        settings.setdefault("CANTO_FILTER_SCHEMES", "image")
+        settings.setdefault("CANTO_FILTER_SCHEMES", "")  # eg image or image|video
 
         if not settings.get("CANTO_API_URL"):
             raise ImproperlyConfigured("setting CANTO_API_URL is required.")

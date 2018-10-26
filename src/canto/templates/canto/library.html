@@ -1,30 +1,30 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
+
+
+{% block footer %}{{ block.super }}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@riophae/vue-treeselect@0.0.37/dist/vue-treeselect.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@riophae/vue-treeselect@0.0.37/dist/vue-treeselect.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@riophae/vue-treeselect@0.0.37/dist/vue-treeselect.min.js"></script>
+    <script type="text/javascript" src="{% static "js/canto/canto.js" %}"></script>
+    <link rel="stylesheet" href="{% static "styles/canto/canto.css" %}">
+    <script type="text/javascript">
+        let tree_url = "{% url 'canto:tree-json' %}";
+        let album_url = "{% url 'canto:album-json' 'ID-PLACEHOLDER' %}";
+        let binary_url = "{% url 'canto:binary' 'URL-PLACEHOLDER' %}";
+        let search_url = "{% url 'canto:search-json' 'QUERY-PLACEHOLDER' %}";
+
+        {% url 'canto-item-detail' 'ID-PLACEHOLDER' as detail_url %}
+        let detail_url = '#';
+        {% if detail_url %}
+            detail_url = "{{ detail_url }}";
+        {% endif %}
+
+        initializeLibrary("#canto-library", tree_url, album_url, binary_url, search_url, detail_url);
+    </script>
+{% endblock %}
 
 {% block content %}
-    {% block search %}
-        <form method="GET" action="{% url "canto:search" %}">
-            <input type="text" name="query" value="{{ query }}">
-            <input type="submit" value="Search">
-        </form>
-    {% endblock %}
-
-    {% block tree %}
-        <ul style="float: left; width: 300px;">
-            {% for tree_item in tree_items %}
-                <li>
-                    {% include "canto/partials/tree_item.html" with item=tree_item %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endblock %}
-
-    {% block album %}
-    <ul style="float: left; width: 600px;">
-        {% for item in album %}
-            <li>
-                {% include "canto/partials/album_item.html" with item=item %}
-            </li>
-        {% endfor %}
-    </ul>
-    {% endblock %}
+    <div id="canto-library"></div>
 {% endblock %}

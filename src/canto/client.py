@@ -16,58 +16,6 @@ except ImportError:
 logger = getLogger(__name__)
 
 
-class CantoListResult:
-    def __init__(self, data):
-        self.data = data
-
-    @property
-    def _results(self):
-        return self.data.get("results", [])
-
-    def __iter__(self):
-        return iter(self._results)
-
-    def __getitem__(self, item):
-        return self._results[item]
-
-    @property
-    def found(self):
-        """
-        Total number of available results, across all pages
-        """
-        return self.data.get("found", 0)
-
-
-class CantoPaginatedResult(CantoListResult):
-    @property
-    def paginate_by(self):
-        """
-        Total number of available results, across all pages
-        """
-        return self.data["limit"]
-
-    @property
-    def num_pages(self):
-        return math.ceil(self.found / self.paginate_by)
-
-    @property
-    def page(self):
-        start = self.data.get("start", 0)
-        return start // self.paginate_by + 1
-
-    @property
-    def next_page(self):
-        if self.found > self.page * self.paginate_by + len(self._results):
-            return self.page + 1
-        return None
-
-    @property
-    def previous_page(self):
-        if self.page > 1:
-            return self.page - 1
-        return None
-
-
 class CantoClient:
     def __init__(
         self, api_url, app_id, app_secret, oauth_url, oauth_token_url, access_token
@@ -183,15 +131,15 @@ class CantoClient:
     def get_album(
         self,
         album_id,
-        page,
+        start,
         paginate_by,
         scheme,
         sort_by="time",
         sort_direction="descending",
     ):
-        start = max(page - 1, 0) * paginate_by
+        # start = max(page - 1, 0) * paginate_by
         params = {
-            "page_size": paginate_by,
+            "limit": paginate_by,
             "start": start,
             "scheme": scheme,
             "sortBy": sort_by,
@@ -202,20 +150,19 @@ class CantoClient:
             "/api/v1/album/{}".format(album_id), params
         ).json()
 
-        return CantoPaginatedResult(album_data)
+        return album_data
 
     def get_search_results(
         self,
         query,
-        page,
+        start,
         paginate_by,
         scheme,
         sort_by="time",
         sort_direction="descending",
     ):
-        start = max(page - 1, 0) * paginate_by
         params = {
-            "page_size": paginate_by,
+            "limit": paginate_by,
             "start": start,
             "keyword": query,
             "scheme": scheme,
@@ -225,7 +172,7 @@ class CantoClient:
 
         search_results = self._authenticated_request("/api/v1/search", params).json()
 
-        return CantoPaginatedResult(search_results)
+        return search_results
 
     def get_image(self, image_id):
         image_data = self._authenticated_request(
@@ -240,13 +187,12 @@ class CantoClient:
         return response.content
 
     def get_public_url_for_binary(self, url):
-        assert url.startswith(self.api_url + "/api_binary/")
+        assert url.startswith(self.api_url + "/api_binary/"), (url, self.api_url + "/api_binary/")
         response = self._authenticated_request(url, allow_redirects=False)
         assert response.status_code == 302
         return response.headers["Location"]
 
     def get_tree(self):
-        data = self._authenticated_request(
+        return self._authenticated_request(
             "/api/v1/tree", {"sortBy": "name", "sortDirection": "ascending"}
         ).json()
-        return CantoListResult(data)

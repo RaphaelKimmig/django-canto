@@ -1,0 +1,98 @@
+.library input.vue-treeselect__input {
+    /* vue-treeselect just applies the styles to the class, so djangos base.css input[type=text]
+       styles are applied and we explicitly need to reset some of those
+     */
+    border: 0;
+    padding: 0;
+}
+.library {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-template-areas:
+            "tree_label search_label"
+            "tree search"
+            "results results";
+}
+.library .tree-label {
+    grid-area: tree_label;
+}
+.library .search-label {
+    grid-area: search_label;
+}
+.library .vue-treeselect {
+    grid-area: tree;
+    padding-right: 4px;
+}
+.library .search {
+    grid-area: search;
+    box-sizing: border-box;
+    height: 36px; /* to match treeselect */
+    display: flex;
+}
+.library .search input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 100%;
+}
+.library .search button {
+    background: #79aec8;
+    color: white;
+    height: 36px;
+    border-radius: 4px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    margin-left: 4px;
+}
+.library .results {
+    margin-top: 1em;
+    grid-area: results;
+}
+.library .results-list {
+    display: flex;
+    flex-wrap: wrap;
+}
+.library .item {
+    margin: 5px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding: 4px;
+    height: 100%;
+}
+.library .item .item-details {
+    background-color: #79aec8;
+    margin: 0 -5px -5px -5px;
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    max-width: 400px;
+}
+
+.library .item .item-details .item-name {
+}
+
+.library .item .item-details .item-format {
+}
+
+.library .item img {
+}
+.library .pagination {
+    text-align: center;
+}
+.spinner {
+    margin: 10px auto;
+    width: 200px;
+    height: 200px;
+    border: 3px solid rgba(0,0,0,.3);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+}
