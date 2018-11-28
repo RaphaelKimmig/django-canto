@@ -14,3 +14,8 @@ class CantoImageWidget(ForeignKeyRawIdWidget):
             context["related_url"] = mark_safe(related_url)
             context["link_title"] = _("Lookup")
         return context
+
+    def __init__(self, rel, admin_site, attrs=None, using=None):
+        attrs = attrs or {}
+        attrs['data-canto-image'] = 'true'
+        super().__init__(rel, admin_site, attrs, using)
