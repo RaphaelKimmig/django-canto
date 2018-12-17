@@ -31,8 +31,12 @@ class FakeResponse:
 class CantoViewTest(WebTest):
     def setUp(self):
         self.user = G(get_user_model())
-        self.user.user_permissions.add(Permission.objects.get(codename='browse_library'))
-        self.user.user_permissions.add(Permission.objects.get(codename='change_cantosettings'))
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="browse_library")
+        )
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="change_cantosettings")
+        )
 
     def test_settings_default_to_not_connected(self):
         response = self.app.get(reverse("canto:settings"), user=self.user)
@@ -48,22 +52,37 @@ class CantoViewTest(WebTest):
 
     def test_settings_permissions(self):
         unauthorized_user = G(get_user_model())
-        self.app.get(reverse('canto:settings'), user=unauthorized_user, status=403)
-        self.app.post(reverse('canto:disconnect'), user=unauthorized_user, status=403)
-        self.app.post(reverse('canto:refresh-token'), user=unauthorized_user, status=403)
+        self.app.get(reverse("canto:settings"), user=unauthorized_user, status=403)
+        self.app.post(reverse("canto:disconnect"), user=unauthorized_user, status=403)
+        self.app.post(
+            reverse("canto:refresh-token"), user=unauthorized_user, status=403
+        )
 
     def test_browse_permissions(self):
         unauthorized_user = G(get_user_model())
-        self.app.get(reverse('canto:library'), user=unauthorized_user, status=403)
-        self.app.get(reverse('canto:tree-json'), user=unauthorized_user, status=403)
-        self.app.get(reverse('canto:search-json', kwargs={'query': 'something'}), user=unauthorized_user, status=403)
-        self.app.get(reverse('canto:album-json', kwargs={'album_id': '123'}), user=unauthorized_user, status=403)
-        self.app.get(reverse('canto:binary', kwargs={'url': 'foo'}), user=unauthorized_user, status=403)
+        self.app.get(reverse("canto:library"), user=unauthorized_user, status=403)
+        self.app.get(reverse("canto:tree-json"), user=unauthorized_user, status=403)
+        self.app.get(
+            reverse("canto:search-json", kwargs={"query": "something"}),
+            user=unauthorized_user,
+            status=403,
+        )
+        self.app.get(
+            reverse("canto:album-json", kwargs={"album_id": "123"}),
+            user=unauthorized_user,
+            status=403,
+        )
+        self.app.get(
+            reverse("canto:binary", kwargs={"url": "foo"}),
+            user=unauthorized_user,
+            status=403,
+        )
 
     def test_oauth_confirmation_view(self):
         oauth_state = _get_oauth_state(self.user)
         settings_page = self.app.get(
-            reverse("canto:settings") + "?code=CANTO_CODE&state=" + oauth_state, user=self.user
+            reverse("canto:settings") + "?code=CANTO_CODE&state=" + oauth_state,
+            user=self.user,
         )
         self.assertContains(settings_page, "Please confirm the connection to canto")
 

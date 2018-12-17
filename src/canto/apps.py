@@ -25,4 +25,3 @@ class CantoConfig(AppConfig):
             raise ImproperlyConfigured("setting CANTO_APP_ID is required.")
         if not settings.get("CANTO_APP_SECRET"):
             raise ImproperlyConfigured("setting CANTO_APP_SECRET is required.")
-

@@ -25,7 +25,7 @@ from .forms import CantoSettingsForm
 logger = getLogger(__name__)
 
 
-@permission_required("canto.change_cantosettings")
+@permission_required("canto.change_cantosettings", raise_exception=True)
 @require_POST
 def refresh_token(request, success_url=reverse_lazy("canto:settings")):
     refresh_and_save_access_token()
@@ -33,7 +33,7 @@ def refresh_token(request, success_url=reverse_lazy("canto:settings")):
     return HttpResponseRedirect(success_url)
 
 
-@permission_required("canto.change_cantosettings")
+@permission_required("canto.change_cantosettings", raise_exception=True)
 @require_POST
 def disconnect(request, success_url=reverse_lazy("canto:settings")):
     disconnect_canto()

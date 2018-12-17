@@ -7,18 +7,25 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='CantoSettings',
+            name="CantoSettings",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('access_token', models.CharField(max_length=255)),
-                ('refresh_token', models.CharField(max_length=255)),
-                ('token_valid_until', models.DateTimeField(null=True)),
-                ('last_modified_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("access_token", models.CharField(max_length=255)),
+                ("refresh_token", models.CharField(max_length=255)),
+                ("token_valid_until", models.DateTimeField(null=True)),
+                ("last_modified_at", models.DateTimeField(auto_now=True)),
             ],
-        ),
+        )
     ]

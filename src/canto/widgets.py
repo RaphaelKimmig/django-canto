@@ -17,5 +17,5 @@ class CantoImageWidget(ForeignKeyRawIdWidget):
 
     def __init__(self, rel, admin_site, attrs=None, using=None):
         attrs = attrs or {}
-        attrs['data-canto-image'] = 'true'
+        attrs["data-canto-image"] = "true"
         super().__init__(rel, admin_site, attrs, using)

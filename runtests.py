@@ -22,14 +22,20 @@ def runtests(test_path="canto"):
                 "admin": None,
                 "contenttypes": None,
             },
+            SESSION_ENGINE="django.contrib.sessions.backends.signed_cookies",
+
             INSTALLED_APPS=(
                 "django.contrib.contenttypes",
                 "django.contrib.auth",
                 "django.contrib.admin",
                 "canto",
             ),
-            MIDDLEWARE_CLASSES=(),
-            ROOT_URLCONF="canto.tests",
+            MIDDLEWARE=(
+                "django.contrib.sessions.middleware.SessionMiddleware",
+                "django.contrib.messages.middleware.MessageMiddleware",
+                "django.contrib.auth.middleware.AuthenticationMiddleware",
+            ),
+            ROOT_URLCONF="canto.tests.urls",
             TEMPLATES=[
                 {
                     "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -43,6 +49,10 @@ def runtests(test_path="canto"):
                     },
                 }
             ],
+            CANTO_API_URL="https://canto-example.nosuchtold",
+            CANTO_APP_ID="12345",
+            CANTO_APP_SECRET="XXXXX",
+            STATIC_URL="/static/",
         )
 
     django.setup()
