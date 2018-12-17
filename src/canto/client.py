@@ -16,6 +16,14 @@ except ImportError:
 logger = getLogger(__name__)
 
 
+class ApiException(Exception):
+    pass
+
+
+class ResourceNotFound(ApiException):
+    pass
+
+
 class CantoClient:
     def __init__(
         self, api_url, app_id, app_secret, oauth_url, oauth_token_url, access_token
@@ -45,7 +53,6 @@ class CantoClient:
 
             expires_in_seconds = int(data["expiresIn"])
             valid_until = request_time + timedelta(seconds=expires_in_seconds)
-            # token_type = data["tokenType"]
             refresh_token = data["refreshToken"]  # valid for one year
             return access_token, valid_until, refresh_token
         else:
@@ -62,7 +69,7 @@ class CantoClient:
                 error_code,
                 error_description,
             )
-            raise Exception()  # FIXME
+            raise ApiException("Error getting access token")
 
     def refresh_access_token(self, refresh_token):
         params = {
@@ -81,7 +88,6 @@ class CantoClient:
             access_token = data["accessToken"]  # valid for one month
             expires_in_seconds = int(data["expiresIn"])
             valid_until = request_time + timedelta(seconds=expires_in_seconds)
-            token_type = data["tokenType"]
             refresh_token = data["refreshToken"]  # valid for one year
             return access_token, valid_until, refresh_token
         else:
@@ -98,7 +104,7 @@ class CantoClient:
                 error_code,
                 error_description,
             )
-            raise Exception()  # FIXME
+            raise ApiException("Error getting access token")
 
     def _authenticated_request(self, url, params=None, **kwargs):
         assert self.access_token, "an access token is required"
@@ -116,8 +122,15 @@ class CantoClient:
             },
             **kwargs,
         )
-        assert response.ok, response.content
-        return response
+
+        if response.ok:
+            return response
+        elif response.status_code == 404:
+            raise ResourceNotFound()
+        else:
+            raise ApiException(
+                "response status code was {}".format(response.status_code)
+            )
 
     def get_oauth_url(self, state, redirect_uri):
         params = {
@@ -187,9 +200,19 @@ class CantoClient:
         return response.content
 
     def get_public_url_for_binary(self, url):
-        assert url.startswith(self.api_url + "/api_binary/"), (url, self.api_url + "/api_binary/")
+        assert url.startswith(self.api_url + "/api_binary/"), (
+            url,
+            self.api_url + "/api_binary/",
+        )
         response = self._authenticated_request(url, allow_redirects=False)
-        assert response.status_code == 302
+
+        if not response.status_code == 302:
+            raise ApiException(
+                "Unexpected response code {}, expected a redirect".format(
+                    response.status_code
+                )
+            )
+
         return response.headers["Location"]
 
     def get_tree(self):
