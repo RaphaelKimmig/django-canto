@@ -113,6 +113,9 @@ class CantoLibraryView(PermissionRequiredMixin, TemplateView):
 @permission_required("canto.browse_library", raise_exception=True)
 @cache_control(max_age=300)
 def canto_binary_view(request, url):
+    # double slashed may be stripped by the web server
+    if url.startswith('https:/') and not url.startswith('https://'):
+        url = 'https://' + url[len('https:/'):]
     public_url = get_canto_client().get_public_url_for_binary(url)
     return HttpResponseRedirect(public_url)
 
