@@ -24,6 +24,10 @@ class ResourceNotFound(ApiException):
     pass
 
 
+class AccessTokenRequired(ApiException):
+    pass
+
+
 class CantoClient:
     def __init__(
         self, api_url, app_id, app_secret, oauth_url, oauth_token_url, access_token
@@ -107,7 +111,9 @@ class CantoClient:
             raise ApiException("Error getting access token")
 
     def _authenticated_request(self, url, params=None, **kwargs):
-        assert self.access_token, "an access token is required"
+        if not self.access_token:
+            raise AccessTokenRequired("an access token is required")
+
         if not url.startswith(self.api_url):
             url = self.api_url + url
 
@@ -131,6 +137,9 @@ class CantoClient:
             raise ApiException(
                 "response status code was {}".format(response.status_code)
             )
+
+    def test_connection(self):
+        return self._authenticated_request("/api/v1/").json()
 
     def get_oauth_url(self, state, redirect_uri):
         params = {
