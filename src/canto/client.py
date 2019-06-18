@@ -238,3 +238,15 @@ class CantoClient:
         return self._authenticated_request(
             "/api/v1/tree", {"sortBy": "name", "sortDirection": "ascending"}
         ).json()
+
+    def create_folder(self, folder_name, parent_folder_id=None, description=None):
+        if parent_folder_id:
+            url = '/api/v1/folder/{}/{}'.format(parent_folder_id, folder_name)
+        else:
+            url = '/api/v1/folder/{}'.format(folder_name)
+
+        params = {}
+        if description:
+            params["Description"] = '{}'.format(description)
+
+        return self._authenticated_request(url, params=params, method='post').json()
