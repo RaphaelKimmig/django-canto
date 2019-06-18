@@ -110,7 +110,7 @@ class CantoClient:
             )
             raise ApiException("Error getting access token")
 
-    def _authenticated_request(self, url, params=None, **kwargs):
+    def _authenticated_request(self, url, params=None, method='GET', **kwargs):
         if not self.access_token:
             raise AccessTokenRequired("an access token is required")
 
@@ -120,7 +120,17 @@ class CantoClient:
         if params:
             url += "?" + urlencode(params)
 
-        response = requests.get(
+        method = method.lower()
+        if method not in ['get', 'post']:
+            raise ApiException(
+                'method should be one of "get" or "post". Got "{}".'.format(method)
+            )
+
+        if method == 'post':
+            request_method = requests.post
+        else:
+            request_method = requests.get
+        response = request_method(
             url,
             headers={
                 "Authorization": "Bearer {}".format(self.access_token),
