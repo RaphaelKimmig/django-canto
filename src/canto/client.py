@@ -1,4 +1,5 @@
 import math
+from collections import OrderedDict
 from datetime import timedelta
 from json import JSONDecodeError
 from logging import getLogger
@@ -130,6 +131,7 @@ class CantoClient:
             request_method = requests.post
         else:
             request_method = requests.get
+
         response = request_method(
             url,
             headers={
@@ -245,8 +247,62 @@ class CantoClient:
         else:
             url = '/api/v1/folder/{}'.format(folder_name)
 
-        params = {}
+        data = {}
         if description:
-            params["Description"] = '{}'.format(description)
+            data["Description"] = '{}'.format(description)
 
-        return self._authenticated_request(url, params=params, method='post').json()
+        return self._authenticated_request(url, method='post', data=data).json()
+
+    def create_album(self, album_name, parent_folder_id=None, description=None):
+        if parent_folder_id:
+            url = '/api/v1/album/{}/{}'.format(parent_folder_id, album_name)
+        else:
+            url = '/api/v1/album/{}'.format(album_name)
+
+        data = {}
+        if description:
+            data["Description"] = '{}'.format(description)
+
+        return self._authenticated_request(url, method='post', data=data).json()
+
+    def get_upload_setting(self):
+        url = '/api/v1/upload/setting'
+        return self._authenticated_request(url).json()
+
+    def upload_file(self, file, album_id, image_id="", scheme=""):
+        setting = self.get_upload_setting()
+        url = setting.get("url", None)
+        if not url:
+            raise ApiException("Failed to get canto upload setting")
+
+        # we use an ordered dict, since the file must be the last parameter
+        # see https://www.canto.com/api/?api=com#Upload-file
+        data = OrderedDict()
+
+        data["key"] = setting["key"]
+        data["acl"] = setting["acl"]
+        data["AWSAccessKeyId"] = setting["AWSAccessKeyId"]
+        data["Policy"] = setting["Policy"]
+        data["Signature"] = setting["Signature"]
+
+        data["x-amz-meta-file_name"] = "${filename}"
+        data["x-amz-meta-tag"] = ""
+        data["x-amz-meta-scheme"] = scheme  # set original scheme if updating
+        data["x-amz-meta-id"] = image_id  # set original id if updating
+        data["x-amz-meta-album_id"] = album_id
+
+        files = {'file': file}
+
+        response = requests.post(
+            url,
+            data=data,
+            files=files
+        )
+
+        if response.ok:
+            return response
+        else:
+            raise ApiException(
+                "response status code was {}".format(response.status_code)
+            )
+
