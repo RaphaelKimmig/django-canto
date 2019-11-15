@@ -127,12 +127,8 @@ class CantoClient:
                 'method should be one of "get" or "post". Got "{}".'.format(method)
             )
 
-        if method == 'post':
-            request_method = requests.post
-        else:
-            request_method = requests.get
-
-        response = request_method(
+        response = requests.request(
+            method,
             url,
             headers={
                 "Authorization": "Bearer {}".format(self.access_token),
@@ -277,20 +273,19 @@ class CantoClient:
 
         # we use an ordered dict, since the file must be the last parameter
         # see https://www.canto.com/api/?api=com#Upload-file
-        data = OrderedDict()
+        data = {
+            "key": setting["key"],
+            "acl": setting["acl"],
+            "AWSAccessKeyId": setting["AWSAccessKeyId"],
+            "Policy": setting["Policy"],
+            "Signature": setting["Signature"],
 
-        data["key"] = setting["key"]
-        data["acl"] = setting["acl"]
-        data["AWSAccessKeyId"] = setting["AWSAccessKeyId"]
-        data["Policy"] = setting["Policy"]
-        data["Signature"] = setting["Signature"]
-
-        data["x-amz-meta-file_name"] = "${filename}"
-        data["x-amz-meta-tag"] = ""
-        data["x-amz-meta-scheme"] = scheme  # set original scheme if updating
-        data["x-amz-meta-id"] = image_id  # set original id if updating
-        data["x-amz-meta-album_id"] = album_id
-
+            "x-amz-meta-file_name": "${filename}",
+            "x-amz-meta-tag": "",
+            "x-amz-meta-scheme": scheme,  # set original scheme if updating
+            "x-amz-meta-id": image_id,  # set original id if updating
+            "x-amz-meta-album_id": album_id,
+        }
         files = {'file': file}
 
         response = requests.post(
