@@ -27,5 +27,8 @@ class Migration(migrations.Migration):
                 ("token_valid_until", models.DateTimeField(null=True)),
                 ("last_modified_at", models.DateTimeField(auto_now=True)),
             ],
+            options={
+                "permissions": (("browse_library", "Can browse the canto library"),),
+            },
         )
     ]
