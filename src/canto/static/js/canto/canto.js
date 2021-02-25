@@ -144,8 +144,10 @@ let initializeLibrary = function (selector, tree_url, album_url, binary_url, sea
             ':options="tree"\n' +
             ':disable-branch-nodes="true"\n' +
             'placeholder="Select an album"\n' +
+            ':load-options="loadOptions"\n' +
             ':value="selectedAlbumId"' +
             '@input="onAlbumSelect"'+
+            ' search-nested ' +
             '></treeselect>\n' +
             '<h2 class="search-label">Search</h2>\n' +
             '<search :query="query" :on-search="onSearch"></search>\n' +
@@ -157,15 +159,16 @@ let initializeLibrary = function (selector, tree_url, album_url, binary_url, sea
             query: null,
             resultsUrl: null,
         },
-        created: function () {
-            let that = this;
-            fetch(tree_url).then(function (response) {
-                return response.json();
-            }).then(function (data) {
-                that.tree = data.results;
-            })
-        },
         methods: {
+            loadOptions: function ({callback}) {
+                let that = this;
+                fetch(tree_url).then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                    that.tree = data.results;
+                    callback();
+                })
+            },
             buildResultsUrl: function () {
                 if(this.selectedAlbumId !== null && this.selectedAlbumId !== undefined) {
                     return album_url.replace("ID-PLACEHOLDER", this.selectedAlbumId);
