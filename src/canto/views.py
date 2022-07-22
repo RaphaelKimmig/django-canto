@@ -6,9 +6,10 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.messages import success
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views import View
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, cache_page
 from django.views.decorators.http import require_POST
 from django.views.generic import FormView, TemplateView
 
@@ -123,6 +124,7 @@ def canto_binary_view(request, url):
 class CantoTreeJsonView(PermissionRequiredMixin, View):
     permission_required = "canto.browse_library"
 
+    @method_decorator(cache_page(timeout=300))
     def get(self, request, **kwargs):
         results = get_canto_client().get_tree()
         return JsonResponse(results)
