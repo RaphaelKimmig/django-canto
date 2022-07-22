@@ -11,11 +11,11 @@ class CantoConfig(AppConfig):
         settings = settings._wrapped.__dict__
 
         settings.setdefault(
-            "CANTO_OAUTH_URL", "https://oauth.canto.com:8443/oauth/api/oauth2/authorize"
+            "CANTO_OAUTH_URL", "https://oauth.canto.com/oauth/api/oauth2/authorize"
         )
         settings.setdefault(
             "CANTO_OAUTH_TOKEN_URL",
-            "https://oauth.canto.com:8443/oauth/api/oauth2/token",
+            "https://oauth.canto.com/oauth/api/oauth2/token",
         )
         settings.setdefault("CANTO_FILTER_SCHEMES", "")  # eg image or image|video
 
