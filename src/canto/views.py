@@ -7,7 +7,7 @@ from django.contrib.messages import success
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_control, cache_page
 from django.views.decorators.http import require_POST

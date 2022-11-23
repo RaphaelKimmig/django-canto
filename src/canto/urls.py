@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 
 from canto.views import (
     CantoSettingsView,
@@ -13,20 +13,20 @@ from canto.views import (
 
 app_name = "canto"
 urlpatterns = [
-    url(r"^canto/settings/$", CantoSettingsView.as_view(), name="settings"),
-    url(r"^canto/refresh/$", refresh_token, name="refresh-token"),
-    url(r"^canto/disconnect/$", disconnect, name="disconnect"),
-    url(r"^canto/library/$", CantoLibraryView.as_view(), name="library"),
-    url(r"^canto/tree.json$", CantoTreeJsonView.as_view(), name="tree-json"),
-    url(
+    re_path(r"^canto/settings/$", CantoSettingsView.as_view(), name="settings"),
+    re_path(r"^canto/refresh/$", refresh_token, name="refresh-token"),
+    re_path(r"^canto/disconnect/$", disconnect, name="disconnect"),
+    re_path(r"^canto/library/$", CantoLibraryView.as_view(), name="library"),
+    re_path(r"^canto/tree.json$", CantoTreeJsonView.as_view(), name="tree-json"),
+    re_path(
         r"^canto/search/(?P<query>.+).json$",
         CantoSearchJsonView.as_view(),
         name="search-json",
     ),
-    url(
+    re_path(
         r"^canto/album/(?P<album_id>.+).json$",
         CantoAlbumJsonView.as_view(),
         name="album-json",
     ),
-    url(r"^canto/binary/(?P<url>.+)$", canto_binary_view, name="binary"),
+    re_path(r"^canto/binary/(?P<url>.+)$", canto_binary_view, name="binary"),
 ]
