@@ -4,6 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 class CantoConfig(AppConfig):
     name = "canto"
+    default_auto_field = 'django.db.models.AutoField'
 
     def ready(self):
         from django.conf import settings
