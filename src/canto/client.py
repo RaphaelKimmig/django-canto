@@ -18,7 +18,9 @@ logger = getLogger(__name__)
 
 
 class ApiException(Exception):
-    pass
+    def __init__(self, *args, **kwargs) -> None:
+        self.context = kwargs.pop("context", None)
+        super().__init__(*args)
 
 
 class ResourceNotFound(ApiException):
@@ -142,8 +144,14 @@ class CantoClient:
         elif response.status_code == 404:
             raise ResourceNotFound()
         else:
+            try:
+                response_json = response.json()
+            except requests.exceptions.JSONDecodeError:
+                response_json = None
+
             raise ApiException(
-                "response status code was {}: {}".format(response.status_code, response.text)
+                "response status code was {}: {}".format(response.status_code, response.text),
+                context=response_json
             )
 
     def test_connection(self):
@@ -224,10 +232,16 @@ class CantoClient:
         response = self._authenticated_request(url, allow_redirects=False)
 
         if not response.status_code == 302:
+            try:
+                response_json = response.json()
+            except requests.exceptions.JSONDecodeError:
+                response_json = None
+
             raise ApiException(
                 "Unexpected response code, expected a redirect got {}: {}".format(
                     response.status_code, response.text
-                )
+                ),
+                context=response_json
             )
 
         return response.headers["Location"]
@@ -297,7 +311,13 @@ class CantoClient:
         if response.ok:
             return response
         else:
+            try:
+                response_json = response.json()
+            except requests.exceptions.JSONDecodeError:
+                response_json = None
+
             raise ApiException(
-                "response status code was {}: {}".format(response.status_code, response.text)
+                "response status code was {}: {}".format(response.status_code, response.text),
+                context=response_json
             )
 
