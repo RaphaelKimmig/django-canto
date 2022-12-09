@@ -143,7 +143,7 @@ class CantoClient:
             raise ResourceNotFound()
         else:
             raise ApiException(
-                "response status code was {}".format(response.status_code)
+                "response status code was {}: {}".format(response.status_code, response.text)
             )
 
     def test_connection(self):
@@ -225,8 +225,8 @@ class CantoClient:
 
         if not response.status_code == 302:
             raise ApiException(
-                "Unexpected response code {}, expected a redirect".format(
-                    response.status_code
+                "Unexpected response code, expected a redirect got {}: {}".format(
+                    response.status_code, response.text
                 )
             )
 
@@ -298,6 +298,6 @@ class CantoClient:
             return response
         else:
             raise ApiException(
-                "response status code was {}".format(response.status_code)
+                "response status code was {}: {}".format(response.status_code, response.text)
             )
 
