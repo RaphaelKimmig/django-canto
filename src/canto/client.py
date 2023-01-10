@@ -124,9 +124,9 @@ class CantoClient:
             url += "?" + urlencode(params)
 
         method = method.lower()
-        if method not in ['get', 'post']:
+        if method not in ['get', 'post', 'put', 'delete']:
             raise ApiException(
-                'method should be one of "get" or "post". Got "{}".'.format(method)
+                'method should be one of "get", "post", "put" or "delete". Got "{}".'.format(method)
             )
 
         response = requests.request(
@@ -321,3 +321,26 @@ class CantoClient:
                 context=response_json
             )
 
+    def add_tag_to_content(self, content_id, tag, scheme):
+        response = self._authenticated_request(
+            f"/api/v1/{scheme}/{content_id}/tag/{tag}", method="PUT"
+        )
+        return response
+
+    def remove_tag_from_content(self, content_id, tag, scheme):
+        response = self._authenticated_request(
+            f"/api/v1/{scheme}/{content_id}/tag/{tag}", method="DELETE"
+        )
+        return response
+
+    def add_keyword_to_content(self, content_id, keyword, scheme):
+        response = self._authenticated_request(
+            f"/api/v1/{scheme}/{content_id}/keyword/{keyword}", method="PUT"
+        )
+        return response
+
+    def remove_keyword_from_content(self, content_id, keyword, scheme):
+        response = self._authenticated_request(
+            f"/api/v1/{scheme}/{content_id}/keyword/{keyword}", method="DELETE"
+        )
+        return response
